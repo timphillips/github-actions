@@ -22,3 +22,16 @@ jobs:
         if: steps.summary.outputs.approved > 2
         run: |
           echo "Got more than 2 approvals"
+
+      - name: remove 'Ready for review' label when approved
+        uses: actions-ecosystem/action-remove-labels@v1
+        if: steps.summary.outputs.approved > 0 && steps.summary.outputs.changes_requested == 0
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          labels: "2. Ready for review"
+      - name: add 'Passed code review' label when approved
+        uses: actions-ecosystem/action-add-labels@v1
+        if: steps.summary.outputs.approved > 0 && steps.summary.outputs.changes_requested == 0
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          labels: "4. Passed code review"
