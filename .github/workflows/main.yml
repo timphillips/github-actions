@@ -1,19 +1,24 @@
-on: [push]
-
+on:
+  pull_request_review:
+    types:
+      - submitted
 jobs:
-  hello_world_job:
+  test:
     runs-on: ubuntu-latest
-    name: A job to say hello
+    name: test
     steps:
-      # To use this repository's private action,
-      # you must check out the repository
-      - name: Checkout
-        uses: actions/checkout@v2
-      - name: Hello world action step
-        uses: ./ # Uses an action in the root directory
-        id: hello
+      - name: review
+        uses: buildsville/review-summary@v1
+        id: summary
         with:
-          who-to-greet: 'Mona the Octocat'
-      # Use the output from the `hello` step
-      - name: Get the output time
-        run: echo "The time was ${{ steps.hello.outputs.time }}"
+          token: ${{ secrets.GITHUB_TOKEN }}
+      - name: print review summary
+        run: |
+          echo "APPROVE: ${{ steps.summary.outputs.approved }}"
+          echo "REQUEST_CHANGES: ${{ steps.summary.outputs.changes_requested }}"
+          echo "COMMENT: ${{ steps.summary.outputs.commented }}"
+          echo "PENDING: ${{ steps.summary.outputs.pending }}"
+      - name: print if more than 2 approve
+        if: steps.summary.outputs.approved > 2
+        run: |
+          echo "Got more than 2 approvals"
